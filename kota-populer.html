@@ -5,12 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kota Populer - Data Cuaca</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px);
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            border: none;
+        }
+        .btn-refresh {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-refresh:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+    </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="index.html">Data Cuaca</a>
+            <a class="navbar-brand fw-bold" href="index.html"><i class="fas fa-cloud-sun"></i> Data Cuaca</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -26,10 +83,28 @@
     </nav>
 
     <div class="container my-5">
-        <h1 class="text-center mb-4 text-primary">Kota Populer</h1>
-        <p class="text-center text-muted mb-4">Cuaca terkini untuk beberapa kota favorit.</p>
+        <h1 class="text-center mb-4 text-white"><i class="fas fa-star"></i> Kota Populer</h1>
+        <p class="text-center text-white mb-4">Cuaca terkini untuk beberapa kota favorit di Indonesia. Klik kartu untuk detail lebih lanjut!</p>
+        <div class="text-center mb-4">
+            <button class="btn btn-refresh px-4 py-2" onclick="loadPopularCities()"><i class="fas fa-sync-alt"></i> Refresh Data</button>
+        </div>
 
         <div id="popular-cities" class="row g-4 justify-content-center"></div>
+    </div>
+
+    <!-- Modal for detailed weather -->
+    <div class="modal fade" id="weatherModal" tabindex="-1" aria-labelledby="weatherModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="weatherModalLabel">Detail Cuaca</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Content will be populated by JS -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -37,6 +112,8 @@
         const API_KEY = "ddec4165e0ba2c82ad4f4ee850be504f"; // sama seperti index
         const cities = ["Jakarta", "Surabaya", "Bandung", "Malang", "Yogyakarta", "Denpasar"];
         const container = document.getElementById('popular-cities');
+        const modal = new bootstrap.Modal(document.getElementById('weatherModal'));
+        const modalBody = document.getElementById('modal-body');
 
         async function fetchCityWeather(city) {
             const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=id`;
@@ -45,34 +122,79 @@
             return res.json();
         }
 
+        function showModal(data) {
+            const iconUrl = `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+            const temp = Math.round(data.main.temp);
+            const desc = data.weather[0].description.toUpperCase();
+            const feelsLike = Math.round(data.main.feels_like);
+            const pressure = data.main.pressure;
+            const visibility = data.visibility / 1000; // in km
+            const sunrise = new Date(data.sys.sunrise * 1000).toLocaleTimeString('id-ID');
+            const sunset = new Date(data.sys.sunset * 1000).toLocaleTimeString('id-ID');
+
+            modalBody.innerHTML = `
+                <div class="text-center">
+                    <img src="${iconUrl}" alt="Weather Icon" class="weather-icon">
+                    <h3>${data.name}, ${data.sys.country}</h3>
+                    <p class="display-4">${temp}&deg;C</p>
+                    <p class="text-muted">${desc}</p>
+                    <hr>
+                    <div class="row text-start">
+                        <div class="col-6">
+                            <p><i class="fas fa-thermometer-half"></i> Terasa seperti: ${feelsLike}&deg;C</p>
+                            <p><i class="fas fa-tint"></i> Kelembaban: ${data.main.humidity}%</p>
+                            <p><i class="fas fa-wind"></i> Angin: ${data.wind.speed} m/s</p>
+                        </div>
+                        <div class="col-6">
+                            <p><i class="fas fa-compress-arrows-alt"></i> Tekanan: ${pressure} hPa</p>
+                            <p><i class="fas fa-eye"></i> Visibilitas: ${visibility} km</p>
+                            <p><i class="fas fa-sun"></i> Terbit: ${sunrise}</p>
+                            <p><i class="fas fa-moon"></i> Terbenam: ${sunset}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modal.show();
+        }
+
         async function loadPopularCities() {
+            container.innerHTML = ''; // Clear previous content
             for (const city of cities) {
                 const col = document.createElement('div');
-                col.className = 'col-md-4';
-                col.innerHTML = `<div class="card text-center p-3"><p class="mb-0 text-muted">Memuat ${city}...</p></div>`;
+                col.className = 'col-md-4 col-sm-6';
+                col.innerHTML = `
+                    <div class="card text-center p-3 h-100">
+                        <div class="loading-spinner"></div>
+                        <p class="mb-0 text-muted mt-2">Memuat ${city}...</p>
+                    </div>
+                `;
                 container.appendChild(col);
 
                 try {
                     const data = await fetchCityWeather(city);
                     if (!data) {
-                        col.innerHTML = `<div class=\"card text-center p-3\"><p class=\"mb-0 text-danger\">Gagal memuat ${city}</p></div>`;
+                        col.innerHTML = `<div class="card text-center p-3 h-100"><p class="mb-0 text-danger"><i class="fas fa-exclamation-triangle"></i> Gagal memuat ${city}</p></div>`;
                         continue;
                     }
                     const temp = Math.round(data.main.temp);
                     const desc = data.weather[0].description.toUpperCase();
+                    const iconUrl = `http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
                     col.innerHTML = `
-                        <div class=\"card text-center p-3 h-100\">
-                            <h4 class=\"mb-1\">${data.name}, ${data.sys.country}</h4>
-                            <p class=\"display-5 mb-1\">${temp}&deg;C</p>
-                            <p class=\"text-muted mb-2\">${desc}</p>
-                            <small>Kelembaban: ${data.main.humidity}% | Angin: ${data.wind.speed} m/s</small>
-                        </div>`;
+                        <div class="card text-center p-3 h-100" onclick="showModal(${JSON.stringify(data).replace(/"/g, '&quot;')})">
+                            <img src="${iconUrl}" alt="Weather Icon" class="weather-icon">
+                            <h4 class="mb-1">${data.name}, ${data.sys.country}</h4>
+                            <p class="display-5 mb-1">${temp}&deg;C</p>
+                            <p class="text-muted mb-2">${desc}</p>
+                            <small><i class="fas fa-tint"></i> Kelembaban: ${data.main.humidity}% | <i class="fas fa-wind"></i> Angin: ${data.wind.speed} m/s</small>
+                        </div>
+                    `;
                 } catch (e) {
-                    col.innerHTML = `<div class=\"card text-center p-3\"><p class=\"mb-0 text-danger\">Error pada ${city}</p></div>`;
+                    col.innerHTML = `<div class="card text-center p-3 h-100"><p class="mb-0 text-danger"><i class="fas fa-exclamation-triangle"></i> Error pada ${city}</p></div>`;
                 }
             }
         }
 
+        // Load on page load
         loadPopularCities();
     </script>
 </body>
