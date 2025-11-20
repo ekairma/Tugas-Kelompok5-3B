@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tentang Aplikasi - Data Cuaca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">Data Cuaca</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="kota-populer.html">Kota Populer</a></li>
+                    <li class="nav-item"><a class="nav-link" href="riwayat.html">Riwayat</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="tentang.html">Tentang</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h1 class="text-center mb-4 text-primary">Tentang Aplikasi Data Cuaca</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-4">
+                    <p>Aplikasi ini adalah <strong>REST Client sederhana</strong> yang memanfaatkan <em>OpenWeatherMap API</em> untuk menampilkan informasi cuaca berdasarkan nama kota.</p>
+                    <p>Tujuan utama aplikasi:</p>
+                    <ul>
+                        <li>Melatih penggunaan <strong>HTTP request (fetch)</strong> ke Open Public API.</li>
+                        <li>Memahami struktur data <strong>JSON</strong> dan cara menampilkannya ke antarmuka web.</li>
+                        <li>Menerapkan konsep <strong>REST Client</strong> dalam bentuk aplikasi web sederhana.</li>
+                    </ul>
+                    <p>Fitur yang tersedia:</p>
+                    <ol>
+                        <li><strong>Beranda</strong> – Pencari cuaca instan berdasarkan nama kota.</li>
+                        <li><strong>Kota Populer</strong> – Menampilkan cuaca untuk beberapa kota yang sering digunakan.</li>
+                        <li><strong>Riwayat Pencarian</strong> – Menampilkan daftar kota yang pernah dicari beserta ringkasan cuacanya.</li>
+                        <li><strong>Tentang</strong> – Halaman penjelasan singkat mengenai aplikasi dan teknologi yang digunakan.</li>
+                    </ol>
+                    <p class="mb-0">Teknologi yang digunakan: HTML, CSS (Bootstrap 5), dan JavaScript murni (fetch API) tanpa framework tambahan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
