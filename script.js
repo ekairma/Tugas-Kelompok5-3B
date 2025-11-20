@@ -98,17 +98,39 @@ function displayWeather(data) {
     windSpeedEl.textContent = `${data.wind.speed} m/s`; 
     pressureEl.textContent = `${data.main.pressure} hPa`; 
 
-    // Hitung waktu lokal, sunrise, dan sunset
-    const timezoneOffset = data.timezone; // dalam detik
-    const toLocalTime = (unix) => {
-        const date = new Date((unix + timezoneOffset) * 1000);
-        return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    };
+    // Data.timezone (offset dari UTC dalam detik, misalnya 25200 untuk WIB)
+const timezoneOffset = data.timezone; 
 
-    localTimeEl.textContent = toLocalTime(data.dt);
-    sunriseEl.textContent = toLocalTime(data.sys.sunrise);
-    sunsetEl.textContent = toLocalTime(data.sys.sunset);
+// data.dt, data.sys.sunrise, data.sys.sunset (timestamp UTC dalam detik)
 
+const toLocalTime = (unixTimestamp) => {
+    // 1. Tambahkan offset zona waktu ke timestamp UTC
+    const offsetInMs = timezoneOffset * 1000;
+    const localTimestampInMs = (unixTimestamp * 1000) + offsetInMs;
+
+    // 2. Buat objek Date dari timestamp lokal yang sudah dihitung
+    // Penting: Gunakan UTC time-methods untuk mengambil jam/menit dari objek Date
+    // Ini mengabaikan zona waktu komputer pengguna
+    const date = new Date(localTimestampInMs);
+
+    // Ambil jam dan menit menggunakan metode UTC
+    // (Karena timestamp-nya sudah di offset, kita perlakukan sebagai UTC)
+    let hours = date.getUTCHours();
+    let minutes = date.getUTCMinutes();
+
+    // Format jam dan menit menjadi dua digit
+    hours = String(hours).padStart(2, '0');
+    minutes = String(minutes).padStart(2, '0');
+
+    return `${hours}:${minutes}`;
+};
+
+// Penggunaan tetap sama, tetapi sekarang akan menampilkan waktu yang benar
+localTimeEl.textContent = toLocalTime(data.dt);
+sunriseEl.textContent = toLocalTime(data.sys.sunrise);
+sunsetEl.textContent = toLocalTime(data.sys.sunset);
+
+weatherResultDiv.style.display = 'block';
     // Tampilkan div hasil
     weatherResultDiv.style.display = 'block';
 }
